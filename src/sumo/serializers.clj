@@ -27,10 +27,6 @@
   (serialize (assoc obj :content-type "application/json")))
 
 (defmethod serialize :default
-  [{content-type :content-type value :value}]
-  (throw (Exception. (str "No serializer for content-type: " content-type))))
-
-(defmethod serialize "application/octet-stream"
   [{value :value}]
   value)
 
@@ -38,21 +34,16 @@
   [{value :value}]
   (json/generate-string value))
 
-(defmethod serialize "text/plain"
-  [{value :value}]
-  value)
-
 (defmethod serialize "application/clojure"
   [{value :value}]
   (binding [*print-dup* true]
     (pr-str value)))
 
-
 (defmulti deserialize :content-type)
 
 (defmethod deserialize :default
-  [{content-type :content-type}]
-  (throw (Exception. (str "No deserializer for content-type: " content-type))))
+  [{value :value}]
+  (String. ^bytes value))
 
 (defmethod deserialize "application/octet-stream"
   [{value :value}]
@@ -63,10 +54,6 @@
   ; TODO: Having to turn the byte
   ; array into a String seems wrong?
   (json/parse-string (String. ^bytes value)))
-
-(defmethod deserialize "text/plain"
-  [{value :value}]
-  (String. ^bytes value))
 
 (defmethod deserialize "application/clojure"
   [{value :value}]
